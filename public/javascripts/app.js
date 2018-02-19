@@ -15,6 +15,7 @@ firebase.auth().onAuthStateChanged(function(user) {
       signInOptions: [
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
       ],
+      credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     });
   }
 });

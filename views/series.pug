@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  .container
+    .episodes
+      h1=title
+      ul.list-unstyled
+        each episode, index in episodes
+          li(class="border-bottom border-light " + (index === 0 ? "border-top" : ""))
+            a(href='/series/' + slug + '/ep/' + episode.no)
+              div.media
+                img(src=episode.thumb width=80 height=80)
+                div.media-body
+                  p.mb-0= "(Ep." + episode.no + ") " + episode.title
+        else
+          li No episodes.

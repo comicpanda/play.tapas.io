@@ -1,5 +1,12 @@
 extends layout
 
 block content
-  h1= title
   div#firebaseui-auth-container
+  .container
+    .series
+      ul
+        each aSeries in series
+          li
+            a(href='/series/' + aSeries.slug) #{aSeries.title} - #{aSeries.author}
+        else
+          li No series.

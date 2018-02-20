@@ -2,9 +2,9 @@ extends layout
 
 block content
   div#firebaseui-auth-container
-  .container
+  .container.js-container
     .series
-      ul
+      ul.list-unstyled
         each aSeries in series
           li
             a(href='/series/' + aSeries.slug) #{aSeries.title} - #{aSeries.author}

@@ -8,7 +8,7 @@ firebase.initializeApp(config);
 
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
-    console.log(user.uid)
+    $('.js-container').removeClass('d-none');
   } else {
     new firebaseui.auth.AuthUI(firebase.auth()).start('#firebaseui-auth-container', {
       signInSuccessUrl: '/',

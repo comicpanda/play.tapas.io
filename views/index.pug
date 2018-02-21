@@ -8,5 +8,8 @@ block content
         each aSeries in series
           li
             a(href='/series/' + aSeries.slug) #{aSeries.title} - #{aSeries.author}
+            a(href='/a/edit/series/' + aSeries.slug class='float-right ml-2') [Edit]
         else
           li No series.
+    hr
+    p: a(href='/a/new/series') Post a new series

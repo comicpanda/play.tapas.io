@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  .container
+    if mode === 'err'
+      p.p-3.mb-2.bg-danger.text-white All fields are required.
+    form(method='post')
+      .form-group
+        label(for='title') Title
+        input(id='title' name='title' class='form-control' required)
+      button(class='btn btn-primary' type='submit') Post
+
+

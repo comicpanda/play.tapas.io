@@ -12,11 +12,6 @@ router.get('/', function(req, res, next) {
       if (err) {
         return next(err);
       }
-      series = [
-        {id: 1, title: 'Hello World', author: 'Yoon', slug: 'hello-world'},
-        {id: 2, title: 'Hello World2', author: 'Yoon1', slug: 'hello-world2'},
-        {id: 3, title: 'Hello World4', author: 'Yoon2', slug: 'hello-world4'},
-      ];
       res.render('index', { series });
     });
   });

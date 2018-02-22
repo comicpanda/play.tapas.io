@@ -4,7 +4,10 @@ block content
   .container.js-container
     .episodes
       h1=aSeries.title
-      a(href='/a/new/episode')
+      p
+        a(href='/a/edit/series/' + aSeries.slug) Edit this series
+      p
+        a(href='/a/new/episode') Post a new episode
       hr
       ul.list-unstyled
         each episode, index in episodes

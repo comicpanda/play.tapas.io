@@ -4,10 +4,7 @@ const DB = require('../db');
 
 router.get('/:slug', function(req, res, next) {
   const slug = req.params.slug;
-  DB.q((dbErr, db) => {
-    if (dbErr) {
-      return next(dbErr);
-    }
+  DB.q(next, db => {
     db.collection('series').find({slug}).toArray(function(err, series) {
       if (err) {
         return next(err);
@@ -27,10 +24,7 @@ router.get('/:slug', function(req, res, next) {
 
 router.get('/:slug/ep/:no', function(req, res, next) {
   const slug = req.params.slug;
-  DB.q((dbErr, db) => {
-    if (dbErr) {
-      return next(dbErr);
-    }
+  DB.q(next, db => {
     db.collection('series').find({slug}).toArray(function(err, series) {
       if (err) {
         return next(err);

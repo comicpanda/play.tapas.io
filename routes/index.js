@@ -4,10 +4,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  DB.q((dbErr, db) => {
-    if (dbErr) {
-      return next(dbErr);
-    }
+  DB.q(next, db => {
     db.collection('series').find().toArray(function(err, series) {
       if (err) {
         return next(err);

@@ -1,4 +1,7 @@
-const MongoClient = require('mongodb').MongoClient;
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
+const ObjectId = mongodb.ObjectId;
+
 let db;
 exports.connect = (cb) => {
   MongoClient.connect(process.env.MONGODB_URI, function(err, client) {
@@ -13,7 +16,12 @@ exports.connect = (cb) => {
   });
 }
 
-exports.q = (cb) => {
-  const err = !(db) ? new Error('No db connection.') : false;
-  cb(err, db);
+exports.q = (next, cb) => {
+  if (!db) {
+    next(new Error('No db connection.'));
+  } else {
+    cb(db);
+  }
 }
+
+exports.ObjectId = ObjectId;

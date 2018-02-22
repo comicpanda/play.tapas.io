@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DB = require('../db');
+const ObjectId = DB.ObjectId;
 
 router.get('/new/series', function(req, res, next) {
   const aSeries = { title: '', author: '' };
@@ -25,10 +26,7 @@ router.post('/new/series', function(req, res, next) {
     + '-'
     + Math.random().toString(36).substring(7);
 
-  DB.q((dbErr, db) => {
-    if (dbErr) {
-      return next(dbErr);
-    }
+  DB.q(next, db => {
     db.collection('series').insertOne(aSeries, (err, result) => {
       if (err) {
         return next(err);
@@ -41,10 +39,7 @@ router.post('/new/series', function(req, res, next) {
 router.get('/edit/series/:slug', function(req, res, next) {
   const slug = req.params.slug;
 
-  DB.q((dbErr, db) => {
-    if (dbErr) {
-      return next(dbErr);
-    }
+  DB.q(next, db => {
     db.collection('series').find({ slug }).toArray(function(err, series) {
       if (err) {
         return next(err);
@@ -58,6 +53,24 @@ router.get('/edit/series/:slug', function(req, res, next) {
   });
 });
 
+router.post('/edit/series/:slug', function(req, res, next) {
+  const title = req.body.title;
+  const author = req.body.author;
+  const aSeries = { title, author };
+
+  if (!title.trim() || !author.trim()) {
+    return res.render('series-form', { mode: 'err', aSeries });
+  }
+
+  DB.q(next, db => {
+    db.collection('series').findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: aSeries }, (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(`/series/${req.params.slug}`);
+    });
+  });
+});
 
 router.get('/new/series/:id/episode', function(req, res, next) {
   res.render('episode-form');

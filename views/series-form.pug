@@ -2,6 +2,7 @@ extends layout
 
 block content
   .container
+    h1 Post a new series
     if mode === 'err'
       p.p-3.mb-2.bg-danger.text-white All fields are required.
     form(method='post')
@@ -12,6 +13,7 @@ block content
         label(for='author') Author
         input(id='author' name='author' class='form-control' required value=aSeries.author)
       input(type='hidden' name='_id' value=aSeries._id)
+      hr
       button(class='btn btn-primary' type='submit') Post
 
 

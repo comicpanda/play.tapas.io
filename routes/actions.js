@@ -4,8 +4,7 @@ const DB = require('../db');
 const ObjectId = DB.ObjectId;
 
 router.get('/new/series', function(req, res, next) {
-  const aSeries = { title: '', author: '' };
-  res.render('series-form', { aSeries });
+  res.render('series-form', { aSeries: {} });
 });
 
 router.post('/new/series', function(req, res, next) {
@@ -48,7 +47,7 @@ router.get('/edit/series/:slug', function(req, res, next) {
       if (!aSeries) {
         next(null);
       }
-      res.render('series-form', { mode: 'edit', aSeries });
+      res.render('series-form', { aSeries });
     });
   });
 });
@@ -72,8 +71,10 @@ router.post('/edit/series/:slug', function(req, res, next) {
   });
 });
 
+// --------- Episode
 router.get('/new/series/:id/episode', function(req, res, next) {
-  res.render('episode-form');
+  const episode = { series_id: req.params.id };
+  res.render('episode-form', { episode });
 });
 
 module.exports = router;

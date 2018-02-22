@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  .container
+    h1 Post a new episode
+    if mode === 'err'
+      p.p-3.mb-2.bg-danger.text-white All fields are required.
+    form(method='post')
+      .form-group
+        label(for='title') Title
+        input(id='title' name='title' class='form-control' required value=episode.title)
+      .form-group
+        label(for='file') File(s)
+        input(id='file' type='file' multiple  accept='.png, .jpg, .jpeg')
+      input(type='hidden' name='series_id' value=episode.series_id)
+      input(type='hidden' name='_id' value=episode._id)
+      hr
+      button(class='btn btn-primary' type='submit') Post
+
+

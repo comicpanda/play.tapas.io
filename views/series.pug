@@ -5,9 +5,10 @@ block content
     .episodes
       h1=aSeries.title
       p
-        a(href='/a/edit/series/' + aSeries.slug) Edit this series
+        a(href='/a/edit/series/' + aSeries.slug)
+          small Edit this series
       p
-        a(href='/a/new/episode') Post a new episode
+        a(href='/a/new/series/' + aSeries._id + '/episode') Post a new episode
       hr
       ul.list-unstyled
         each episode, index in episodes

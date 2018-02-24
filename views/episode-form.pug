@@ -2,6 +2,7 @@ extends layout
 
 block scripts
   script(src='/javascripts/uploader.js')
+  script(src='/javascripts/progress.js')
 
 block content
   .container
@@ -19,6 +20,7 @@ block content
         input(id='file' type='file' multiple  accept='.png, .jpg, .jpeg')
       input(type='hidden' name='series_id' value=episode.series_id)
       input(type='hidden' name='_id' value=episode._id)
+      #progress-bar
       hr
       button(class='btn btn-primary' type='submit') Post
 

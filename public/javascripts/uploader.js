@@ -4,14 +4,25 @@ const upload = (form, files) => {
   for (var i = 0; i < files.length; i++) {
     formData.append('files', files.item(i));
   }
+  var bar = new ProgressBar.Line('#progress-bar', {
+    strokeWidth: 4,
+    easing: 'easeInOut',
+    duration: 1400,
+    color: '#FFEA82',
+    trailColor: '#eee',
+    trailWidth: 1,
+    svgStyle: {width: '100%', height: '100%'}
+  });
+
+bar.animate(1.0);  // Number from 0.0 to 1.0
 
   jQuery.ajax({
     type        : 'POST',
     url         : R_URL,
     data        : formData,
-    complete    : (a) => {console.log('complete', a);},
-    success     : (a) => {console.log('success', a);},
-    error       : (a) => {console.log('error', a);},
+    complete    : xhr => {console.log('complete', xhr);},
+    success     : (res) => {console.log('success', res);},
+    error       : xhr => {console.log('error', xhr);},
     processData : false,
     contentType : false,
     dataType    : 'json',

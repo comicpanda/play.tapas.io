@@ -24,6 +24,23 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//https://stackoverflow.com/a/33905671/194274
+app.use((req, res, next) => {
+  const authorizer = app.get('authorizer');
+
+  const b64auth = new Buffer((req.headers.authorization || '').split(' ')[1] || '', 'base64').toString();
+  const colonIdx = b64auth.indexOf(':');
+  const username = b64auth.substring(-1, colonIdx);
+  const password = b64auth.substring(colonIdx + 1);
+
+  if (authorizer[username] === undefined || authorizer[username] !== password) {
+    res.set('WWW-Authenticate', 'Basic realm="401"');
+    res.status(401).send('Authentication required.');
+    return;
+  }
+  next();
+});
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/series', series);

@@ -3,7 +3,7 @@ const MongoClient = mongodb.MongoClient;
 const ObjectId = mongodb.ObjectId;
 
 let db;
-exports.connect = (cb) => {
+exports.connect = cb => {
   MongoClient.connect(process.env.MONGODB_URI, function(err, client) {
     if (err) {
       console.log('error', err);

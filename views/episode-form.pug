@@ -16,12 +16,23 @@ block content
         label(for='title') Title
         input(id='title' name='title' class='form-control' required value=episode.title)
       .form-group
+        label(for='no') Episode No.
+        input(id='no' name='no' class='form-control' required value=episode.no type='number')
+      .form-group
         label(for='file') File(s)
         input(id='file' type='file' multiple  accept='.png, .jpg, .jpeg')
       input(type='hidden' name='series_id' value=episode.series_id)
       input(type='hidden' name='_id' value=episode._id)
-      #progress-bar
+      .js-toolbar.d-none
+        a(href='#' class='js-delete-file') Delete
+      ul.js-preview.list-unstyled
       hr
       button(class='btn btn-primary' type='submit') Post
-
+  div(class='modal fade js-progress-modal' tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-body
+          p Uploading..
+          #progress-bar
+  div.modal-backdrop.fade.js-modal-backdrop.d-none
 

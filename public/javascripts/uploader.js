@@ -2,7 +2,16 @@ const R_URL = 'https://rdev.tapas.io/file/upload/HERO_CARTOON';
 
 class Uploader {
   deleteFiles() {
-    console.log($('.js-check'));
+    const checkboxs = $('.js-check:checked');
+    if (checkboxs.length  === 0) {
+      return;
+    }
+
+    if (window.confirm('Do you want to delete them?')) {
+      checkboxs.each((index, checkbox) => {
+        checkbox.closest('li').remove();
+      });
+    }
   }
 
   shortFilename(filename) {
@@ -14,18 +23,18 @@ class Uploader {
   }
 
   success(response) {
-    const $preview = $('.js-preview');
     this.$toolbar.removeClass('d-none');
 
     let data = response;
     if (!response.length) {
       data = [response];
     }
-
     data.forEach(d => {
+      const fileData = {};
       const eFile = `<a target="_blank" href="${d.s3.url}" title="${d.filename}">${this.shortFilename(d.filename)}</a>`;
-      $preview.append(`<li><input type="checkbox" class="js-check"> ${eFile}</li>`);
-      // console.log(d.filename, d.s3.bucket_name, d.s3.src_keys[1], d.s3.src_keys[1], d.s3.desc_keys[1], d.s3.url);
+      const eHidden = `<input type="hidden" name="contents" value="${d.s3.desc_keys[1]}"/>
+        <input type="hidden" name="src_keys" value="${d.s3.src_keys[1]}"/>`;
+      this.$preview.append(`<li><input type="checkbox" class="js-check"> ${eFile} ${eHidden}</li>`);
     });
   }
 
@@ -105,13 +114,21 @@ class Uploader {
 
   constructor() {
     const $uploaderForm = $('#uploader');
-
     this.$file = $('#file');
     this.progressBar = this.initProgressBar('#progress-bar');
     this.$toolbar = this.initToolbar();
+    this.$preview = $('.js-preview');
 
-    this.$file.on('change', (e) => {
+    this.$file.on('change', e => {
       this.upload($uploaderForm[0], this.$file[0].files);
+    });
+
+    $('.js-post').on('click', e => {
+      if (this.$preview.find('li').length > 0) {
+        $('.js-upload-form').submit();
+      } else {
+        alert('Please add file(s).');
+      }
     });
   }
 }

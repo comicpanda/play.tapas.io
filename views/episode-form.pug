@@ -1,8 +1,8 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/uploader.js')
   script(src='/javascripts/progress.js')
+  script(src='/javascripts/uploader.js')
 
 block content
   .container
@@ -11,7 +11,7 @@ block content
       p.p-3.mb-2.bg-danger.text-white All fields are required.
 
     form(method='post' id='uploader')
-    form(method='post')
+    form(method='post' class='js-upload-form')
       .form-group
         label(for='title') Title
         input(id='title' name='title' class='form-control' required value=episode.title)
@@ -21,13 +21,12 @@ block content
       .form-group
         label(for='file') File(s)
         input(id='file' type='file' multiple  accept='.png, .jpg, .jpeg')
-      input(type='hidden' name='series_id' value=episode.series_id)
       input(type='hidden' name='_id' value=episode._id)
       .js-toolbar.d-none
         a(href='#' class='js-delete-file') Delete
       ul.js-preview.list-unstyled
       hr
-      button(class='btn btn-primary' type='submit') Post
+      button(class='btn btn-primary js-post' type='button') Post
   div(class='modal fade js-progress-modal' tabindex='-1')
     .modal-dialog
       .modal-content

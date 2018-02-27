@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  .container.js-container
+    .episode
+      h1=episode.title
+      hr
+      .cotents
+        each content in episode.contents
+          img(src=content)

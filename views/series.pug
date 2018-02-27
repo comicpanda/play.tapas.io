@@ -3,20 +3,23 @@ extends layout
 block content
   .container.js-container
     .episodes
-      h1=aSeries.title
+      h1=series.title
       p
-        a(href='/a/edit/series/' + aSeries.slug)
+        a(href='/a/edit/series/' + series.slug)
           small Edit this series
       p
-        a(href='/a/new/series/' + aSeries._id + '/episode') Post a new episode
+        a(href='/a/new/series/' + series._id + '/' + series.slug + '/episode') Post a new episode
       hr
       ul.list-unstyled
         each episode, index in episodes
           li(class='border-bottom border-light ' + (index === 0 ? 'border-top' : ''))
-            a(href='/series/' + aSeries.slug + '/ep/' + episode.no)
+            a(href='/series/' + series.slug + '/ep/' + episode.no)
               div.media
-                img(src=episode.thumb width=80 height=80)
-                div.media-body
-                  p.mb-0= '(Ep.' + episode.no + ') ' + episode.title
+                img(src=episode.contents[0] width=80 height=80)
+                div.media-body.ml-2
+                  p= '(Ep.' + episode.no + ') ' + episode.title
+                  p.mb-0
+                     a(href='/a/edit/series/' + series._id + '/' + series.slug + '/episode' )
+                      small Edit this episode
         else
           li No episodes.

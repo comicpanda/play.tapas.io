@@ -20,7 +20,7 @@ router.get('/:slug', function(req, res, next) {
   });
 });
 
-router.get('/:slug/ep/:no', function(req, res, next) {
+router.get('/:slug/episodes/:no', function(req, res, next) {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {

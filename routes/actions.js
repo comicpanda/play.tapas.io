@@ -1,9 +1,11 @@
 const express = require('express');
 const axios = require('axios');
+const querystring = require('querystring');
 const router = express.Router();
 const DB = require('../db');
 const ObjectId = DB.ObjectId;
 const R_URL = 'https://rdev.tapas.io/file/move-bucket';
+
 router.get('/new/series', function(req, res, next) {
   res.render('series-form', { series: {} });
 });
@@ -41,11 +43,8 @@ router.get('/edit/series/:slug', function(req, res, next) {
 
   DB.q(next, db => {
     db.collection('series').findOne({ slug }, (err, series) => {
-      if (err) {
+      if (err || !series) {
         return next(err);
-      }
-      if (!series) {
-        next(null);
       }
       res.render('series-form', { series });
     });
@@ -74,23 +73,28 @@ router.post('/edit/series/:slug', function(req, res, next) {
 // --------- Episode
 router.get('/new/series/:id/:slug/episode', function(req, res, next) {
   const episode = { series_id: req.params.id };
-  res.render('episode-form', { episode });
+  res.render('episode-form', { episode, contents: [] });
 });
 
 router.post('/new/series/:id/:slug/episode', function(req, res, next) {
+  const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
+  const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
-    series_id: req.params.id,
+    series_id: req.body.series_id,
     title: req.body.title,
     no: req.body.no,
-    contents: req.body.contents
+    filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
+    contents: contents.map(content => `https://s3-us-west-2.amazonaws.com/hero.tapas.io/${content}`)
   };
   let requests = [];
-  episode.contents.forEach((content, idx) => {
-    requests.push(axios.post(R_URL, {
+  contents.forEach((content, idx) => {
+    requests.push(axios.post(R_URL, querystring.stringify({
       src_bucket: 'r.tapas.io',
       desc_bucket: 'hero.tapas.io',
-      src_key: req.body.src_keys[idx],
+      src_key: srcKeys[idx],
       desc_key: content
+    }),{
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }));
   });
   axios.all(requests).then(() => {
@@ -99,7 +103,74 @@ router.post('/new/series/:id/:slug/episode', function(req, res, next) {
         if (err) {
           return next(err);
         }
-        res.redirect(`/series/${req.params.slug}/ep/${episode.no}`);
+        res.redirect(`/series/${req.params.slug}/episodes/${episode.no}`);
+      });
+    });
+  }).catch(err => {
+    next(err);
+  });
+});
+
+router.get('/edit/episodes/:id', function(req, res, next) {
+  DB.q(next, db => {
+    db.collection('episode').findOne({_id: new ObjectId(req.params.id)}, (err, episode) => {
+      if (err || !episode) {
+        return next(err);
+      }
+      let contents = [];
+      episode.contents.forEach((content, idx) => {
+        contents.push({
+          s3: {
+            url: content,
+            desc_keys: ['', content],
+            src_keys: ['', '']
+          },
+          filename: episode.filenames[idx],
+        });
+      });
+
+      res.render('episode-form', { episode, contents });
+    });
+  });
+});
+
+router.post('/edit/episodes/:id', function(req, res, next) {
+  const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
+  const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
+  const episode = {
+    series_id: req.body.series_id,
+    title: req.body.title,
+    no: req.body.no,
+    filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
+    contents: contents.map(content => {
+      if (!content.startsWith('https')) {
+        return `https://s3-us-west-2.amazonaws.com/hero.tapas.io/${content}`;
+      }
+      return content;
+    })
+  };
+  let requests = [];
+  contents.forEach((content, idx) => {
+    if (!content.startsWith('https')) {
+      requests.push(axios.post(R_URL, querystring.stringify({
+        src_bucket: 'r.tapas.io',
+        desc_bucket: 'hero.tapas.io',
+        src_key: srcKeys[idx],
+        desc_key: content
+      }),{
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }));
+    }
+  });
+
+  axios.all(requests).then(() => {
+    DB.q(next, db => {
+      const _id = new ObjectId(req.body._id);
+      db.collection('episode').findOneAndUpdate({ _id }, { $set: episode }, (err, result) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect(`/series/${req.params.slug}/episodes/${episode.no}`);
       });
     });
   }).catch(err => {

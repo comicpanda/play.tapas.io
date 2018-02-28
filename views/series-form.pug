@@ -2,7 +2,10 @@ extends layout
 
 block content
   .container
-    h1 Post a new series
+    if series._id
+      h1 Edit series
+    else
+      h1 Post a new series
     if mode === 'err'
       p.p-3.mb-2.bg-danger.text-white All fields are required.
     form(method='post')

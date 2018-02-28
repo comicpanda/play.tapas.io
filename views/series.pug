@@ -13,13 +13,10 @@ block content
       ul.list-unstyled
         each episode, index in episodes
           li(class='border-bottom border-light ' + (index === 0 ? 'border-top' : ''))
-            a(href='/series/' + series.slug + '/ep/' + episode.no)
+            a(href='/series/' + series.slug + '/episodes/' + episode.no)
               div.media
                 img(src=episode.contents[0] width=80 height=80)
                 div.media-body.ml-2
                   p= '(Ep.' + episode.no + ') ' + episode.title
-                  p.mb-0
-                     a(href='/a/edit/series/' + series._id + '/' + series.slug + '/episode' )
-                      small Edit this episode
         else
           li No episodes.

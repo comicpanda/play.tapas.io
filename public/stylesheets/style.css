@@ -1,0 +1,11 @@
+.contents {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.content-img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}

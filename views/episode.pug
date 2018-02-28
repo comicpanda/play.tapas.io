@@ -1,10 +1,14 @@
 extends layout
 
 block content
-  .container.js-container
+  .container
     .episode
+      span.badge.badge-info='Ep.'+episode.no
       h1=episode.title
+      p
+       a(href='/a/edit/episodes/' + episode._id )
+        small Edit this episode
       hr
-      .cotents
-        each content in episode.contents
-          img(src=content)
+  .contents
+    each content in episode.contents
+      img(src=content class='content-img' alt='content img')

@@ -22,17 +22,18 @@ class Uploader {
     return filename;
   }
 
-  success(response) {
+  drawPreview(previewData) {
     this.$toolbar.removeClass('d-none');
 
-    let data = response;
-    if (!response.length) {
-      data = [response];
+    let data = previewData;
+    if (!previewData.length) {
+      data = [previewData];
     }
     data.forEach(d => {
       const fileData = {};
       const eFile = `<a target="_blank" href="${d.s3.url}" title="${d.filename}">${this.shortFilename(d.filename)}</a>`;
       const eHidden = `<input type="hidden" name="contents" value="${d.s3.desc_keys[1]}"/>
+        <input type="hidden" name="filenames" value="${d.filename}"/>
         <input type="hidden" name="src_keys" value="${d.s3.src_keys[1]}"/>`;
       this.$preview.append(`<li><input type="checkbox" class="js-check"> ${eFile} ${eHidden}</li>`);
     });
@@ -47,40 +48,37 @@ class Uploader {
     for (var i = 0; i < files.length; i++) {
       formData.append('files', files.item(i));
     }
-    // this.progressToggleModal(true);
-    const t = [{"s3":{"src_keys":["tmp/20180226/pc/f0/096bf966-4acd-4d00-b843-d226c87e100e.jpg","tmp/20180226/pc/f0/096bf966-4acd-4d00-b843-d226c87e100e_z.jpg"],"desc_keys":["pc/f0/096bf966-4acd-4d00-b843-d226c87e100e.jpg","pc/f0/096bf966-4acd-4d00-b843-d226c87e100e_z.jpg"],"url":"https://s3-us-west-2.amazonaws.com/r.tapas.io/tmp/20180226/pc/f0/096bf966-4acd-4d00-b843-d226c87e100e.jpg","bucket_name":"r.tapas.io","desc_bucket_name":"r.tapas.io"},"width":940,"height":1785,"size":46358,"filename":"c7ca14af_9dc3_470a_851c_615521044bb9_0.jpg","type":"HERO_CARTOON","rgb_hex":null},{"s3":{"src_keys":["tmp/20180226/pc/07/c9d053ee-54f9-406b-af83-a96132cd73c2.jpg","tmp/20180226/pc/07/c9d053ee-54f9-406b-af83-a96132cd73c2_z.jpg"],"desc_keys":["pc/07/c9d053ee-54f9-406b-af83-a96132cd73c2.jpg","pc/07/c9d053ee-54f9-406b-af83-a96132cd73c2_z.jpg"],"url":"https://s3-us-west-2.amazonaws.com/r.tapas.io/tmp/20180226/pc/07/c9d053ee-54f9-406b-af83-a96132cd73c2.jpg","bucket_name":"r.tapas.io","desc_bucket_name":"r.tapas.io"},"width":940,"height":1785,"size":116449,"filename":"c7ca14af_9dc3_470a_851c_615521044bb9_2.jpg","type":"HERO_CARTOON","rgb_hex":null}];
-    this.success(t);
-    this.$file.val('');
+    this.progressToggleModal(true);
 
-  //   jQuery.ajax({
-  //     type        : 'POST',
-  //     url         : R_URL,
-  //     data        : formData,
-  //     complete    : xhr => { console.log('complete', xhr); },
-  //     success     : res => { console.log('success', res); },
-  //     error       : xhr => { this.progressToggleModal(false); },
-  //     processData : false,
-  //     contentType : false,
-  //     dataType    : 'json',
-  //     xhr         : () => {
-  //       let xhr;
-  //       try {
-  //         xhr = new window.XMLHttpRequest();
-  //       } catch (e) {
-  //       }
-  //       if (xhr) {
-  //         xhr.upload.addEventListener('progress', evt => {
-  //           if (evt.lengthComputable) {
-  //             const progress = evt.loaded / evt.total;
-  //             this.progressBar.animate(progress, progress < 1 ? () => {} : () => {
-  //               this.progressToggleModal(false);
-  //             });
-  //           }
-  //         }, false);
-  //         return xhr;
-  //       }
-  //     }
-  //   });
+    jQuery.ajax({
+      type        : 'POST',
+      url         : R_URL,
+      data        : formData,
+      complete    : xhr => { this.$file.val(''); },
+      success     : res => { this.drawPreview(res) },
+      error       : xhr => { this.progressToggleModal(false); },
+      processData : false,
+      contentType : false,
+      dataType    : 'json',
+      xhr         : () => {
+        let xhr;
+        try {
+          xhr = new window.XMLHttpRequest();
+        } catch (e) {
+        }
+        if (xhr) {
+          xhr.upload.addEventListener('progress', evt => {
+            if (evt.lengthComputable) {
+              const progress = evt.loaded / evt.total;
+              this.progressBar.animate(progress, progress < 1 ? () => {} : () => {
+                this.progressToggleModal(false);
+              });
+            }
+          }, false);
+          return xhr;
+        }
+      }
+    });
   }
 
   progressToggleModal(on) {
@@ -130,6 +128,11 @@ class Uploader {
         alert('Please add file(s).');
       }
     });
+
+    const contentsStr = $('.js-contents').val();
+    if (contentsStr) {
+      this.drawPreview(JSON.parse(contentsStr));
+    }
   }
 }
 

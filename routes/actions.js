@@ -5,6 +5,7 @@ const router = express.Router();
 const DB = require('../db');
 const ObjectId = DB.ObjectId;
 const R_URL = 'https://rdev.tapas.io/file/move-bucket';
+const S3_URL = 'https://s3-us-west-2.amazonaws.com/hero.tapas.io/';
 
 router.get('/new/series', function(req, res, next) {
   res.render('series-form', { series: {} });
@@ -82,7 +83,7 @@ router.get('/new/series/:slug/episode', (req, res, next) => {
   });
 });
 
-router.post('/new/series/:slug/episode', async (req, res, next) => {
+router.post('/new/series/:slug/episode', (req, res, next) => {
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
@@ -90,7 +91,7 @@ router.post('/new/series/:slug/episode', async (req, res, next) => {
     title: req.body.title,
     no: req.body.no,
     filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
-    contents: contents.map(content => `https://s3-us-west-2.amazonaws.com/hero.tapas.io/${content}`)
+    contents: contents.map(content => `${S3_URL}${content}`)
   };
   let requests = [];
   contents.forEach((content, idx) => {
@@ -121,7 +122,7 @@ router.get('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
   const series = await DB.asyncQ((db, resolve, reject) => {
     db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
       if (err || !series) {
-        reject(err);
+        return reject(err);
       }
       resolve(series);
     });
@@ -149,7 +150,8 @@ router.get('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
   });
 });
 
-router.post('/edit/series/:slug/episodes/:episodeId', (req, res, next) => {
+router.post('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
+  const _id = new ObjectId(req.body._id);
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
@@ -159,11 +161,25 @@ router.post('/edit/series/:slug/episodes/:episodeId', (req, res, next) => {
     filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
     contents: contents.map(content => {
       if (!content.startsWith('https')) {
-        return `https://s3-us-west-2.amazonaws.com/hero.tapas.io/${content}`;
+        return `${S3_URL}${content}`;
       }
       return content;
     })
   };
+  const currentEpisode = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').findOne({ _id }, (err, episode) => {
+      if (err || !episode) {
+        return reject(err);
+      }
+      resolve(episode);
+    });
+  }).catch(err => next(err));
+  let deletedFiles = [];
+  currentEpisode.contents.forEach(content => {
+    if (!contents.includes(content))  {
+      deletedFiles.push({filename: content.replace(S3_URL, '')});
+    }
+  });
   let requests = [];
   // TODO duplicated
   contents.forEach((content, idx) => {
@@ -181,10 +197,19 @@ router.post('/edit/series/:slug/episodes/:episodeId', (req, res, next) => {
 
   axios.all(requests).then(() => {
     DB.q(next, db => {
-      const _id = new ObjectId(req.body._id);
-      db.collection('episode').findOneAndUpdate({ _id }, { $set: episode }, (err, result) => {
+      db.collection('episode').findOneAndUpdate({ _id }, { $set: episode }, async (err, result) => {
         if (err) {
           return next(err);
+        }
+        if (deletedFiles.length > 0) {
+          await DB.asyncQ((db, resolve, reject) => {
+            db.collection('deleted_files').insertMany(deletedFiles, (err) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            })
+          });
         }
         res.redirect(`/series/${req.params.slug}/episodes/${episode.no}`);
       });

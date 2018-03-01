@@ -24,4 +24,14 @@ exports.q = (next, cb) => {
   }
 }
 
+exports.asyncQ = cb => {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject(new Error('No db connection.'));
+    } else {
+      cb(db, resolve, reject);
+    }
+  });
+}
+
 exports.ObjectId = ObjectId;

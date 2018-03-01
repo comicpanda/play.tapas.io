@@ -8,7 +8,7 @@ block content
         a(href='/a/edit/series/' + series.slug)
           small Edit this series
       p
-        a(href='/a/new/series/' + series._id + '/' + series.slug + '/episode') Post a new episode
+        a(href='/a/new/series/' + series.slug + '/episode') Post a new episode
       hr
       ul.list-unstyled
         each episode, index in episodes
@@ -17,6 +17,8 @@ block content
               div.media
                 img(src=episode.contents[0] width=80 height=80)
                 div.media-body.ml-2
-                  p= '(Ep.' + episode.no + ') ' + episode.title
+                  p
+                    span.badge.badge-info.mr-2='Ep.'+episode.no
+                    =episode.title
         else
           li No episodes.

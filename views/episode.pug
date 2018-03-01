@@ -2,13 +2,16 @@ extends layout
 
 block content
   .container
+    a(href='/series/' + series.slug) 👈👈 Go to series
     .episode
       span.badge.badge-info='Ep.'+episode.no
       h1=episode.title
       p
-       a(href='/a/edit/episodes/' + episode._id )
+       a(href='/a/edit/series/' + series.slug +'/episodes/' + episode._id )
         small Edit this episode
       hr
   .contents
     each content in episode.contents
       img(src=content class='content-img' alt='content img')
+  a(href='/series/' + series.slug) 👈👈 Go to series
+  p next and prev episodes are coming soon.

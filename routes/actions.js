@@ -71,12 +71,18 @@ router.post('/edit/series/:slug', function(req, res, next) {
 });
 
 // --------- Episode
-router.get('/new/series/:id/:slug/episode', function(req, res, next) {
-  const episode = { series_id: req.params.id };
-  res.render('episode-form', { episode, contents: [] });
+router.get('/new/series/:slug/episode', (req, res, next) => {
+  DB.q(next, db => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        next(err);
+      }
+      res.render('episode-form', { episode: {}, contents: [], series });
+    });
+  });
 });
 
-router.post('/new/series/:id/:slug/episode', function(req, res, next) {
+router.post('/new/series/:slug/episode', async (req, res, next) => {
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
@@ -111,9 +117,18 @@ router.post('/new/series/:id/:slug/episode', function(req, res, next) {
   });
 });
 
-router.get('/edit/episodes/:id', function(req, res, next) {
+router.get('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
+  const series = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
   DB.q(next, db => {
-    db.collection('episode').findOne({_id: new ObjectId(req.params.id)}, (err, episode) => {
+    db.collection('episode').findOne({_id: new ObjectId(req.params.episodeId)}, (err, episode) => {
       if (err || !episode) {
         return next(err);
       }
@@ -129,12 +144,12 @@ router.get('/edit/episodes/:id', function(req, res, next) {
         });
       });
 
-      res.render('episode-form', { episode, contents });
+      res.render('episode-form', { episode, contents, series });
     });
   });
 });
 
-router.post('/edit/episodes/:id', function(req, res, next) {
+router.post('/edit/series/:slug/episodes/:episodeId', (req, res, next) => {
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
@@ -150,6 +165,7 @@ router.post('/edit/episodes/:id', function(req, res, next) {
     })
   };
   let requests = [];
+  // TODO duplicated
   contents.forEach((content, idx) => {
     if (!content.startsWith('https')) {
       requests.push(axios.post(R_URL, querystring.stringify({

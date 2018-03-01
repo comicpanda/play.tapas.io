@@ -24,14 +24,16 @@ block content
       .form-group
         label(for='file') File(s)
         input(id='file' type='file' multiple  accept='.png, .jpg, .jpeg')
-      input(type='hidden' name='series_id' value=episode.series_id)
+      input(type='hidden' name='series_id' value=series._id)
+      input(type='hidden' name='series_slug' value=series.slug)
       input(type='hidden' name='_id' value=episode._id)
       .js-toolbar.d-none
         a(href='#' class='js-delete-file') Delete
       ul.js-preview.list-unstyled
       input(type='hidden' value=contents class='js-contents')
       hr
-      button(class='btn btn-primary js-post' type='button') Post
+      button(class='btn btn-primary js-post mr-2' type='button') Post
+      a(href='/series/' + series.slug class='btn') Cancel
   div(class='modal fade js-progress-modal' tabindex='-1')
     .modal-dialog
       .modal-content

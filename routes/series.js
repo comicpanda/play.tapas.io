@@ -20,19 +20,23 @@ router.get('/:slug', function(req, res, next) {
   });
 });
 
-router.get('/:slug/episodes/:no', function(req, res, next) {
+router.get('/:slug/episodes/:no', async (req, res, next) => {
   const slug = req.params.slug;
+  const series = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => next(err));
+
   DB.q(next, db => {
-    db.collection('series').findOne({slug}, (err, series) => {
+    db.collection('episode').findOne({series_id: `${series._id}`, no: req.params.no}, (err, episode) => {
       if (err) {
         return next(err);
       }
-      db.collection('episode').findOne({series_id: `${series._id}`, no: req.params.no}, (err, episode) => {
-        if (err) {
-          return next(err);
-        }
-        res.render('episode', { episode });
-      });
+      res.render('episode', { episode, series });
     });
   });
 });

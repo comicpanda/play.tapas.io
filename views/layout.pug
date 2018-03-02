@@ -9,13 +9,12 @@ html
     link(rel='stylesheet' href='https://cdn.firebase.com/libs/firebaseui/2.5.1/firebaseui.css')
     script(src='https://www.gstatic.com/firebasejs/4.9.0/firebase-app.js')
     script(src='https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js')
-    script(src='https://www.gstatic.com/firebasejs/4.9.0/firebase-firestore.js')
     script(src='https://cdn.firebase.com/libs/firebaseui/2.5.1/firebaseui.js')
     script(src='http://code.jquery.com/jquery-3.3.1.min.js' integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=' crossorigin='anonymous')
-    //script(src='/javascripts/app.js')
     block scripts
 
   body
-    nav.main-nav.ml-3
+    nav.main-nav.ml-3.mr-3.mb-4.d-flex.justify-content-between
         a(href='/'): h4 Home
+        a(href='/logout') logout
     block content

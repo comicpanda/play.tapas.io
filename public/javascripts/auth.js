@@ -6,9 +6,11 @@ const config = {
   };
 firebase.initializeApp(config);
 
-firebase.auth().onAuthStateChanged(function(user) {
+firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    $('.js-container').removeClass('d-none');
+    user.getIdToken(true).then(idToken => {
+      $('#auth-form').append(`<input name="idToken" type="hidden" value="${idToken}"/>`).submit();
+    });
   } else {
     new firebaseui.auth.AuthUI(firebase.auth()).start('#firebaseui-auth-container', {
       signInSuccessUrl: '/',
@@ -16,6 +18,11 @@ firebase.auth().onAuthStateChanged(function(user) {
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
       ],
       credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+      callbacks: {
+        signInSuccess: (currentUser, credential, redirectUrl) => {
+          return false;
+        }
+      }
     });
   }
 });

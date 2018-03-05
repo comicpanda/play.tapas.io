@@ -8,9 +8,7 @@ firebase.initializeApp(config);
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    user.getIdToken(true).then(idToken => {
-      $('#auth-form').append(`<input name="idToken" type="hidden" value="${idToken}"/>`).submit();
-    });
+    $('#auth-form').append(`<input name="uid" type="hidden" value="${user.uid}"/>`).submit();
   } else {
     new firebaseui.auth.AuthUI(firebase.auth()).start('#firebaseui-auth-container', {
       signInSuccessUrl: '/',

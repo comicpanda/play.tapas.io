@@ -13,6 +13,7 @@ const series = require('./routes/series');
 const actions = require('./routes/actions');
 const auth = require('./routes/auth');
 const app = express();
+const session = {};
 
 fireAdmin.initializeApp({
   credential: fireAdmin.credential.cert(
@@ -33,30 +34,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//https://stackoverflow.com/a/33905671/194274
 app.use('/auth', auth);
+
 app.use((req, res, next) => {
-  fireAdmin.auth().verifyIdToken(req.cookies.idToken)
-    .then(decodedToken => {
-      var uid = decodedToken.uid;
-      console.log('uid', uid);
-      next();
-    }).catch(error => {
-      console.log(error);
-      res.status(401).send('Authentication required.');
-    });
-  // const authorizer = app.get('authorizer');
-
-  // const b64auth = new Buffer((req.headers.authorization || '').split(' ')[1] || '', 'base64').toString();
-  // const colonIdx = b64auth.indexOf(':');
-  // const username = b64auth.substring(-1, colonIdx);
-  // const password = b64auth.substring(colonIdx + 1);
-
-  // if (authorizer[username] === undefined || authorizer[username] !== password) {
-  //   res.set('WWW-Authenticate', 'Basic realm="401"');
-  //   res.status(401).send('Authentication required.');
-  //   return;
-  // }
+  if (!req.cookies.uid) {
+    return res.redirect('/auth');
+  }
+  let uid = req.cookies.uid;
+  if (session[uid]) {
+    req.uid = uid;
+    next();
+  } else {
+    const authorizer = app.get('authorizer');
+    fireAdmin.auth().getUser(uid)
+      .then(() => {
+        session[uid] = true;
+        setTimeout(() => {
+          delete session[uid];
+        }, 60 * 60 * 1000);
+        next();
+      }).catch(error => {
+        res.redirect('/auth');
+      });
+  }
 });
 
 app.use('/', index);

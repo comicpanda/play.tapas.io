@@ -12,9 +12,11 @@ router.get('/new/series', function(req, res, next) {
 });
 
 router.post('/new/series', function(req, res, next) {
+  const uid = req.uid;
   const title = req.body.title;
   const author = req.body.author;
-  const series = { title, author };
+  const password = req.body.password;
+  const series = { title, author, password, uid };
   if (!title.trim() || !author.trim()) {
     return res.render('series-form', { mode: 'err', series });
   }
@@ -47,6 +49,9 @@ router.get('/edit/series/:slug', function(req, res, next) {
       if (err || !series) {
         return next(err);
       }
+      if (series.uid !== req.uid) {
+        return res.redirect(`/series/${series.slug}`);
+      }
       res.render('series-form', { series });
     });
   });
@@ -55,7 +60,8 @@ router.get('/edit/series/:slug', function(req, res, next) {
 router.post('/edit/series/:slug', function(req, res, next) {
   const title = req.body.title;
   const author = req.body.author;
-  const series = { title, author };
+  const password = req.body.password;
+  const series = { title, author, password };
 
   if (!title.trim() || !author.trim()) {
     return res.render('series-form', { mode: 'err', series });
@@ -78,6 +84,7 @@ router.get('/new/series/:slug/episode', (req, res, next) => {
       if (err || !series) {
         next(err);
       }
+
       res.render('episode-form', { episode: {}, contents: [], series });
     });
   });

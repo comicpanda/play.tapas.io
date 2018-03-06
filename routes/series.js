@@ -14,7 +14,7 @@ router.get('/:slug', function(req, res, next) {
         if (err) {
           return next(err);
         }
-        res.render('series', { episodes, series });
+        res.render('series', { episodes, series, uid: req.uid });
       });
     });
   });

@@ -4,9 +4,10 @@ block content
   .container.js-container
     .episodes
       h1=series.title
-      p
-        a(href='/a/edit/series/' + series.slug)
-          small Edit this series
+      if series.uid === uid
+        p
+          a(href='/a/edit/series/' + series.slug)
+            small Edit this series
       p
         a(href='/a/new/series/' + series.slug + '/episode') Post a new episode
       hr

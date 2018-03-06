@@ -15,6 +15,9 @@ block content
       .form-group
         label(for='author') Author
         input(id='author' name='author' class='form-control' required value=series.author)
+      .form-group
+        label(for='password') Password
+        input(id='password' name='password' class='form-control' required value=series.password)
       input(type='hidden' name='_id' value=series._id)
       hr
       button(class='btn btn-primary mr-2' type='submit') Post

@@ -85,6 +85,10 @@ router.get('/new/series/:slug/episode', (req, res, next) => {
         next(err);
       }
 
+      if (series.uid !== req.uid) {
+        return res.redirect(`/series/${series.slug}`);
+      }
+
       res.render('episode-form', { episode: {}, contents: [], series });
     });
   });

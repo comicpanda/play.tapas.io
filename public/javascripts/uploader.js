@@ -23,12 +23,12 @@ class Uploader {
   }
 
   drawPreview(previewData) {
-    this.$toolbar.removeClass('d-none');
-
     let data = previewData;
-    if (!previewData.length) {
+    if (previewData.length === undefined) {
       data = [previewData];
     }
+
+    this.$toolbar.removeClass('d-none');
     data.forEach(d => {
       const fileData = {};
       const eFile = `<a target="_blank" href="${d.s3.url}" title="${d.filename}">${this.shortFilename(d.filename)}</a>`;
@@ -129,9 +129,9 @@ class Uploader {
       }
     });
 
-    const contentsStr = $('.js-contents').val();
-    if (contentsStr) {
-      this.drawPreview(JSON.parse(contentsStr));
+    const contents = JSON.parse($('.js-contents').val() || '[]');
+    if (contents.length > 0) {
+      this.drawPreview(contents);
     }
   }
 }

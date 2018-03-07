@@ -5,7 +5,7 @@ block content
     .series
       ul.list-unstyled
         each aSeries in series
-          li
+          li.mb-2
             a(href='/series/' + aSeries.slug) #{aSeries.title} - #{aSeries.author}
         else
           li No series.

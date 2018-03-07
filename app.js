@@ -50,6 +50,7 @@ app.use((req, res, next) => {
     fireAdmin.auth().getUser(uid)
       .then(() => {
         session[uid] = true;
+        req.uid = uid;
         res.locals.uid = uid;
         setTimeout(() => {
           delete session[uid];

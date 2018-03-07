@@ -3,6 +3,8 @@ const router = express.Router();
 const DB = require('../db');
 const ObjectId = DB.ObjectId;
 
+const session = {};
+
 router.get('/:slug', function(req, res, next) {
   const slug = req.params.slug;
   DB.q(next, db => {
@@ -20,6 +22,38 @@ router.get('/:slug', function(req, res, next) {
   });
 });
 
+router.get('/:slug/password/episodes/:no', function(req, res, next) {
+  const slug = req.params.slug;
+  const no = req.params.no;
+  DB.q(next, db => {
+    db.collection('series').findOne({slug}, (err, series) => {
+      if (err) {
+        return next(err);
+      }
+      res.render('password-form', { series, no });
+    });
+  });
+});
+
+router.post('/:slug/password/episodes/:no', function(req, res, next) {
+  const slug = req.params.slug;
+  DB.q(next, db => {
+    db.collection('series').findOne({slug}, (err, series) => {
+      if (err) {
+        return next(err);
+      }
+      if (series.password !== req.body.password) {
+        return res.redirect(`/series/${slug}`);
+      }
+      session[`${res.uid}.${slug}`] = true;
+      setTimeout(() => {
+        delete session[`${res.uid}.${slug}`];
+      }, 24 * 60 * 60 * 1000)
+      res.redirect(`/series/${slug}/episodes/${req.params.no}`);
+    });
+  });
+});
+
 router.get('/:slug/episodes/:no', async (req, res, next) => {
   const slug = req.params.slug;
   const series = await DB.asyncQ((db, resolve, reject) => {
@@ -30,6 +64,10 @@ router.get('/:slug/episodes/:no', async (req, res, next) => {
       resolve(series);
     });
   }).catch(err => next(err));
+
+  if (req.uid !== series.uid && !session[`${res.uid}.${slug}`]) {
+    return res.redirect(`/series/${slug}/password/episodes/${req.params.no}`);
+  }
 
   DB.q(next, db => {
     db.collection('episode').findOne({series_id: `${series._id}`, no: req.params.no}, (err, episode) => {

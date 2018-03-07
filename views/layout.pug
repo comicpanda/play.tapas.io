@@ -16,5 +16,6 @@ html
   body
     nav.main-nav.ml-3.mr-3.mb-4.d-flex.justify-content-between
         a(href='/'): h4 Home
-        a(href='/logout') logout
+        if uid
+            a(href='/auth/logout') logout
     block content

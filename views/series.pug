@@ -4,7 +4,7 @@ block content
   .container.js-container
     .episodes
       h1=series.title
-      if series.uid === uid
+      if editable
         p
           a(href='/a/edit/series/' + series.slug)
             small Edit this series

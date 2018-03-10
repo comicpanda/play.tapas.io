@@ -56,7 +56,10 @@ class Uploader {
       data        : formData,
       complete    : xhr => { this.$file.val(''); },
       success     : res => { this.drawPreview(res) },
-      error       : xhr => { this.progressToggleModal(false); },
+      error       : xhr => {
+        this.progressToggleModal(false);
+        alert((xhr.responseJSON || {}).message || xhr.statusText);
+      },
       processData : false,
       contentType : false,
       dataType    : 'json',

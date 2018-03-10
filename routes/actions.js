@@ -6,6 +6,7 @@ const DB = require('../db');
 const ObjectId = DB.ObjectId;
 const R_URL = 'https://rdev.tapas.io/file/move-bucket';
 const S3_URL = 'https://s3-us-west-2.amazonaws.com/hero.tapas.io/';
+const editable = (series, req) => series.uid === req.uid || (series.emails || '').split(',').indexOf(req.email) > -1;
 
 router.get('/new/series', function(req, res, next) {
   res.render('series-form', { series: {} });
@@ -16,7 +17,8 @@ router.post('/new/series', function(req, res, next) {
   const title = req.body.title;
   const author = req.body.author;
   const password = req.body.password;
-  const series = { title, author, password, uid };
+  const emails = req.body.emails;
+  const series = { title, author, password, uid, emails };
   if (!title.trim() || !author.trim()) {
     return res.render('series-form', { mode: 'err', series });
   }
@@ -41,7 +43,7 @@ router.post('/new/series', function(req, res, next) {
   });
 });
 
-router.get('/edit/series/:slug', function(req, res, next) {
+  router.get('/edit/series/:slug', (req, res, next) => {
   const slug = req.params.slug;
 
   DB.q(next, db => {
@@ -49,7 +51,7 @@ router.get('/edit/series/:slug', function(req, res, next) {
       if (err || !series) {
         return next(err);
       }
-      if (series.uid !== req.uid) {
+      if (!editable(series, req)) {
         return res.redirect(`/series/${series.slug}`);
       }
       res.render('series-form', { series });
@@ -57,11 +59,12 @@ router.get('/edit/series/:slug', function(req, res, next) {
   });
 });
 
-router.post('/edit/series/:slug', function(req, res, next) {
+router.post('/edit/series/:slug', (req, res, next) => {
   const title = req.body.title;
   const author = req.body.author;
   const password = req.body.password;
-  const series = { title, author, password };
+  const emails = req.body.emails;
+  const series = { title, author, password, emails };
 
   if (!title.trim() || !author.trim()) {
     return res.render('series-form', { mode: 'err', series });
@@ -85,7 +88,7 @@ router.get('/new/series/:slug/episode', (req, res, next) => {
         next(err);
       }
 
-      if (series.uid !== req.uid) {
+      if (!editable(series, req)) {
         return res.redirect(`/series/${series.slug}`);
       }
 

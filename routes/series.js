@@ -4,8 +4,9 @@ const DB = require('../db');
 const ObjectId = DB.ObjectId;
 
 const session = {};
+const editable = (series, req) => series.uid === req.uid || (series.emails || '').split(',').indexOf(req.email) > -1;
 
-router.get('/:slug', function(req, res, next) {
+router.get('/:slug', (req, res, next) => {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
@@ -16,13 +17,13 @@ router.get('/:slug', function(req, res, next) {
         if (err) {
           return next(err);
         }
-        res.render('series', { episodes, series, uid: req.uid });
+        res.render('series', { episodes, series, editable: editable(series, req) });
       });
     });
   });
 });
 
-router.get('/:slug/password/episodes/:no', function(req, res, next) {
+router.get('/:slug/password/episodes/:no', (req, res, next) => {
   const slug = req.params.slug;
   const no = req.params.no;
   DB.q(next, db => {
@@ -35,7 +36,7 @@ router.get('/:slug/password/episodes/:no', function(req, res, next) {
   });
 });
 
-router.post('/:slug/password/episodes/:no', function(req, res, next) {
+router.post('/:slug/password/episodes/:no', (req, res, next) => {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
@@ -65,7 +66,7 @@ router.get('/:slug/episodes/:no', async (req, res, next) => {
     });
   }).catch(err => next(err));
 
-  if (req.uid !== series.uid && !session[`${res.uid}.${slug}`]) {
+  if (!editable(series, req) && !session[`${res.uid}.${slug}`]) {
     return res.redirect(`/series/${slug}/password/episodes/${req.params.no}`);
   }
 

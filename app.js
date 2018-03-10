@@ -43,14 +43,16 @@ app.use((req, res, next) => {
   let uid = req.cookies.uid;
   if (session[uid]) {
     req.uid = uid;
+    req.email = session[uid];
     res.locals.uid = uid;
     next();
   } else {
     const authorizer = app.get('authorizer');
     fireAdmin.auth().getUser(uid)
-      .then(() => {
-        session[uid] = true;
+      .then((userRecord) => {
+        session[uid] = userRecord.email;
         req.uid = uid;
+        req.email = userRecord.email;
         res.locals.uid = uid;
         setTimeout(() => {
           delete session[uid];

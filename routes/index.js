@@ -3,7 +3,7 @@ const DB = require('../db');
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', (req, res, next) => {
   DB.q(next, db => {
     db.collection('series').find().toArray((err, series) => {
       if (err) {

@@ -8,11 +8,11 @@ const R_URL = 'https://rdev.tapas.io/file/move-bucket';
 const S3_URL = 'https://s3-us-west-2.amazonaws.com/hero.tapas.io/';
 const editable = (series, req) => series.uid === req.uid || (series.emails || '').split(',').indexOf(req.email) > -1;
 
-router.get('/new/series', function(req, res, next) {
+router.get('/new/series', (req, res, next) => {
   res.render('series-form', { series: {} });
 });
 
-router.post('/new/series', function(req, res, next) {
+router.post('/new/series', (req, res, next) => {
   const uid = req.uid;
   const title = req.body.title;
   const author = req.body.author;

@@ -43,7 +43,7 @@ router.post('/new/series', (req, res, next) => {
   });
 });
 
-  router.get('/edit/series/:slug', (req, res, next) => {
+router.get('/edit/series/:slug', (req, res, next) => {
   const slug = req.params.slug;
 
   DB.q(next, db => {
@@ -142,6 +142,10 @@ router.get('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
     });
   }).catch(err => { next(err) });
 
+  if (!editable(series, req)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
   DB.q(next, db => {
     db.collection('episode').findOne({_id: new ObjectId(req.params.episodeId)}, (err, episode) => {
       if (err || !episode) {
@@ -165,6 +169,19 @@ router.get('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
 });
 
 router.post('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
+  const series = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  if (!editable(series, req)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
   const _id = new ObjectId(req.body._id);
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
@@ -225,11 +242,59 @@ router.post('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => 
             })
           });
         }
-        res.redirect(`/series/${req.params.slug}/episodes/${episode.no}`);
+        res.redirect(`/series/${series.slug}/episodes/${episode.no}`);
       });
     });
   }).catch(err => {
     next(err);
+  });
+});
+
+router.delete('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => {
+  const series = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  if (!editable(series, req)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
+  const _id = new ObjectId(req.params.episodeId);
+  const currentEpisode = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').findOne({ _id }, (err, episode) => {
+      if (err || !episode) {
+        return reject(err);
+      }
+      resolve(episode);
+    });
+  }).catch(err => next(err));
+
+  let deletedFiles = [];
+  currentEpisode.contents.forEach(content => {
+    deletedFiles.push({filename: content.replace(S3_URL, '')});
+  });
+
+  await DB.asyncQ((db, resolve, reject) => {
+    db.collection('deleted_files').insertMany(deletedFiles, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    })
+  });
+
+  DB.q(next, db => {
+    db.collection('episode').deleteOne({ _id }, (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(`/series/${series.slug}`);
+    });
   });
 });
 

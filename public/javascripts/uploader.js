@@ -136,6 +136,9 @@ class Uploader {
     if (contents.length > 0) {
       this.drawPreview(contents);
     }
+    $('.js-delete-form').on('submit', () => {
+      return confirm('Are you sure?');
+    })
   }
 }
 

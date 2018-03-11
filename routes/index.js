@@ -5,7 +5,7 @@ const router = express.Router();
 /* GET home page. */
 router.get('/', (req, res, next) => {
   DB.q(next, db => {
-    db.collection('series').find().toArray((err, series) => {
+    db.collection('series').find().sort({title: 1}).toArray((err, series) => {
       if (err) {
         return next(err);
       }

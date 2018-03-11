@@ -34,10 +34,12 @@ block content
       hr
       button(class='btn btn-primary js-post mr-2' type='button') Post
       a(href='/series/' + series.slug class='btn') Cancel
-    hr
-    form(method='post' class='js-delete-form')
-      input(type='hidden' name='_method' value='DELETE')
-      button(class='btn btn-danger btn-sm' type='submit') DELETE EPISODE
+    if episode._id
+      hr
+      form(method='post' class='js-delete-form')
+        input(type='hidden' name='_method' value='DELETE')
+        button(class='btn btn-danger btn-sm' type='submit') DELETE EPISODE
+
   div(class='modal fade js-progress-modal' tabindex='-1')
     .modal-dialog
       .modal-content

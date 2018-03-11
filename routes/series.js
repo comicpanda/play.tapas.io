@@ -14,7 +14,7 @@ router.get('/:slug', (req, res, next) => {
         return next(err);
       }
 
-      db.collection('episode').find({series_id: `${series._id}`}).toArray((err, episodes) => {
+      db.collection('episode').find({series_id: `${series._id}`}).sort({no: 1}).toArray((err, episodes) => {
         if (err) {
           return next(err);
         }

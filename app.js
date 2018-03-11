@@ -5,7 +5,7 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const fireAdmin = require('firebase-admin');
-
+const methodOverride = require('method-override');
 
 const index = require('./routes/index');
 const users = require('./routes/users');
@@ -31,15 +31,23 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(methodOverride((req, res) => {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    const method = req.body._method
+    delete req.body._method
+    return method
+  }
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/auth', auth);
-
 app.use((req, res, next) => {
   if (!req.cookies.uid) {
     return res.redirect('/auth');
   }
+
   let uid = req.cookies.uid;
   if (session[uid]) {
     req.uid = uid;
@@ -50,9 +58,13 @@ app.use((req, res, next) => {
     const authorizer = app.get('authorizer');
     fireAdmin.auth().getUser(uid)
       .then((userRecord) => {
-        session[uid] = userRecord.email;
+        const email = userRecord.email;
+        if (authorizer[email] === undefined) {
+          return res.redirect('/auth/permission');
+        }
+        session[uid] = email;
         req.uid = uid;
-        req.email = userRecord.email;
+        req.email = email;
         res.locals.uid = uid;
         setTimeout(() => {
           delete session[uid];
@@ -63,7 +75,6 @@ app.use((req, res, next) => {
       });
   }
 });
-
 app.use('/', index);
 app.use('/users', users);
 app.use('/series', series);

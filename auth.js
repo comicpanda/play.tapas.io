@@ -10,7 +10,7 @@ exports.loadAuthorizer = cb => {
       }
       let authorizer = {};
       users.forEach(user => {
-        authorizer[user.username] = user.password;
+        authorizer[user.email] = user.admin || false;
       });
       cb(authorizer);
     });

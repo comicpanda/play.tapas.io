@@ -10,9 +10,10 @@ router.get('/:slug', (req, res, next) => {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
-      if (err) {
+      if (err || !series) {
         return next(err);
       }
+
       db.collection('episode').find({series_id: `${series._id}`}).toArray((err, episodes) => {
         if (err) {
           return next(err);
@@ -28,7 +29,7 @@ router.get('/:slug/password/episodes/:no', (req, res, next) => {
   const no = req.params.no;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
-      if (err) {
+      if (err || !series) {
         return next(err);
       }
       res.render('password-form', { series, no });
@@ -40,7 +41,7 @@ router.post('/:slug/password/episodes/:no', (req, res, next) => {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
-      if (err) {
+      if (err || !serie) {
         return next(err);
       }
       if (series.password !== req.body.password) {
@@ -66,13 +67,13 @@ router.get('/:slug/episodes/:no', async (req, res, next) => {
     });
   }).catch(err => next(err));
 
-  if (!editable(series, req) && !session[`${res.uid}.${slug}`]) {
+  if (!req.email.endsWith('tapasmedia.co') && !editable(series, req) && !session[`${res.uid}.${slug}`]) {
     return res.redirect(`/series/${slug}/password/episodes/${req.params.no}`);
   }
 
   DB.q(next, db => {
     db.collection('episode').findOne({series_id: `${series._id}`, no: req.params.no}, (err, episode) => {
-      if (err) {
+      if (err || !episode) {
         return next(err);
       }
       res.render('episode', { episode, series });

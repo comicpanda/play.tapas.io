@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  .container.js-container
+    h1 Users
+    .users
+      ul
+        each user in users
+          li.mb-2 #{user.email}
+            if user.admin
+              span &nbsp;(admin)
+    hr
+    h3 Add user
+    form(method='post')
+      .form-group
+        label(for='email') Email
+        input(id='email' name='email' class='form-control' required)
+      .form-group
+        label(for='email') Admin?
+        input(id='admin' name='admin' class='form-control' type='checkbox')
+        button(class='btn btn-primary mt-2' type='submit') Add
+    hr
+    h3 Delete user
+    form(method='post')
+      input(type='hidden' name='_method' value='DELETE')
+      .form-group
+        label(for='email') Email
+        input(id='email' name='email' class='form-control' required)
+        button(class='btn btn-primary mt-2' type='submit') Delete
+

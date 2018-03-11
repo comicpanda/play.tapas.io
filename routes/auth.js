@@ -6,6 +6,10 @@ router.get('/', (req, res, next) => {
   res.render('auth');
 });
 
+router.get('/permission', (req, res, next) => {
+  res.render('permission');
+});
+
 router.get('/logout', (req, res, next) => {
   res.clearCookie('uid');
   res.render('logout');

@@ -58,6 +58,10 @@ router.post('/:slug/password/episodes/:no', (req, res, next) => {
 
 router.get('/:slug/episodes/:no', async (req, res, next) => {
   const slug = req.params.slug;
+  const no = parseInt(req.params.no, 10);
+  if (isNaN(no)) {
+    return next();
+  }
   const series = await DB.asyncQ((db, resolve, reject) => {
     db.collection('series').findOne({ slug }, (err, series) => {
       if (err || !series) {
@@ -68,15 +72,40 @@ router.get('/:slug/episodes/:no', async (req, res, next) => {
   }).catch(err => next(err));
 
   if (!req.email.endsWith('tapasmedia.co') && !editable(series, req) && !session[`${res.uid}.${slug}`]) {
-    return res.redirect(`/series/${slug}/password/episodes/${req.params.no}`);
+    return res.redirect(`/series/${slug}/password/episodes/${no}`);
   }
 
+  const series_id = `${series._id}`;
+  const prevEpisode = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').find({series_id, no: { $lt: no}}).sort({no: -1}).limit(1).toArray((err, episodes) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(episodes[0]);
+    });
+  });
+
+  const nextEpisode = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').find({series_id, no: { $gt: no}}).sort({no: 1}).limit(1).toArray((err, episodes) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(episodes[0]);
+    });
+  });
+  const episodeNavMap = {
+    hasPrev: !!prevEpisode,
+    hasNext: !!nextEpisode,
+    prevNo: (prevEpisode || {}).no,
+    nextNo: (nextEpisode || {}).no
+  };
+
   DB.q(next, db => {
-    db.collection('episode').findOne({series_id: `${series._id}`, no: req.params.no}, (err, episode) => {
+    db.collection('episode').findOne({ series_id, no }, (err, episode) => {
       if (err || !episode) {
         return next(err);
       }
-      res.render('episode', { episode, series });
+      res.render('episode', { episode, series, episodeNavMap });
     });
   });
 });

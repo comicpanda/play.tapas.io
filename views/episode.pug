@@ -14,8 +14,20 @@ block content
     each content in episode.contents
       img(src=content class='content-img' alt='content img')
   .container.footer
-    a(href='/series/' + series.slug) 👈👈 Go to series
-    p next and prev episodes are coming soon.
+    p
+      if (episodeNavMap.hasPrev)
+        a(href='/series/' + series.slug + '/episodes/' + episodeNavMap.prevNo).
+          👈👈 <span class='badge badge-info'>Ep.#{episodeNavMap.prevNo}</span> Prev episode
+      if (episodeNavMap.hasPrev && episodeNavMap.hasNext)
+        span.mr-3.ml-3 |
+      if (episodeNavMap.hasNext)
+        a(href='/series/' + series.slug + '/episodes/' + episodeNavMap.nextNo).
+          <span class='badge badge-info'>Ep.#{episodeNavMap.nextNo}</span> Next episode 👉👉
+    p
+      a(href='/series/' + series.slug) 👈👈 Go to series
+      span.mr-3.ml-3 |
+      a(href='#') 👆👆 Go to top
+    hr.mb-5
     #disqus_thread
     script(type="text/javascript").
       var disqus_config = function () {

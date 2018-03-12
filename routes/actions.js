@@ -59,7 +59,7 @@ router.get('/edit/series/:slug', (req, res, next) => {
   });
 });
 
-router.post('/edit/series/:slug', (req, res, next) => {
+router.post('/edit/series/:slug', async (req, res, next) => {
   const title = req.body.title;
   const author = req.body.author;
   const password = req.body.password;
@@ -70,6 +70,19 @@ router.post('/edit/series/:slug', (req, res, next) => {
     return res.render('series-form', { mode: 'err', series });
   }
 
+  const currentSeries = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  if (!editable(currentSeries, req)) {
+    return res.redirect(`/series/${currentSeries.slug}`);
+  }
+
   DB.q(next, db => {
     db.collection('series').findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: series }, (err, result) => {
       if (err) {
@@ -78,6 +91,24 @@ router.post('/edit/series/:slug', (req, res, next) => {
       res.redirect(`/series/${req.params.slug}`);
     });
   });
+});
+
+router.delete('/edit/series/:slug', async (req, res, next) => {
+  const series = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  if (!editable(series, req)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
+  //TODO Delete logic
+  res.redirect(`/series/${series.slug}`);
 });
 
 // --------- Episode
@@ -103,7 +134,7 @@ router.post('/new/series/:slug/episode', (req, res, next) => {
   const episode = {
     series_id: req.body.series_id,
     title: req.body.title,
-    no: req.body.no,
+    no: parseInt(req.body.no, 10),
     filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
     contents: contents.map(content => `${S3_URL}${content}`)
   };
@@ -188,7 +219,7 @@ router.post('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => 
   const episode = {
     series_id: req.body.series_id,
     title: req.body.title,
-    no: req.body.no,
+    no: parseInt(req.body.no, 10),
     filenames: (typeof req.body.src_keys === 'string' ? [req.body.filenames] : req.body.filenames),
     contents: contents.map(content => {
       if (!content.startsWith('https')) {

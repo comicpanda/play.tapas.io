@@ -16,3 +16,15 @@ block content
   .container.footer
     a(href='/series/' + series.slug) 👈👈 Go to series
     p next and prev episodes are coming soon.
+    #disqus_thread
+    script(type="text/javascript").
+      var disqus_config = function () {
+        this.page.url = 'http://play.tapas.io/series/#{series.slug}/episodes/#{episode.no}';
+        this.page.identifier = '#{episode._id}';
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://play-tapas-io.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();

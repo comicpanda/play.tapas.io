@@ -138,7 +138,7 @@ class Uploader {
     }
     $('.js-delete-form').on('submit', () => {
       return confirm('Are you sure?');
-    })
+    });
   }
 }
 

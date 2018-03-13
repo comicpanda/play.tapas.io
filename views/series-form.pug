@@ -21,9 +21,17 @@ block content
       .form-group
         label(for='emails') Co Authors
         input(id='emails' name='emails' class='form-control' value=series.emails placeholder='emails;a comma as a separator')
+        .small You don't need to enter your email.
       input(type='hidden' name='_id' value=series._id)
       hr
-      button(class='btn btn-primary mr-2' type='submit') Post
+      button(class='btn btn-primary mr-2' type='submit')=series._id ? 'Save' : 'Post'
       a(href=(series._id ? '/series/' + series.slug : '/') class='btn') Cancel
-
-
+    if series._id
+      hr
+      form(method='post' class='js-delete-form')
+        input(type='hidden' name='_method' value='DELETE')
+        button(class='btn btn-danger btn-sm' type='submit') DELETE SERIES
+      script(type="text/javascript").
+        $('.js-delete-form').on('submit', () => {
+          return confirm('Are you sure?');
+        });

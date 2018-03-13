@@ -14,10 +14,9 @@ block content
       ul.list-unstyled
         each episode, index in episodes
           li(class='border-bottom border-light ' + (index === 0 ? 'border-top' : ''))
-            a(href='/series/' + series.slug + '/episodes/' + episode.no)
+            a(href='/series/' + series.slug + '/episodes/' + episode.no class='d-block')
               div.media
-                img(src=episode.contents[0] width=80 height=80)
-                div.media-body.ml-2
+                div.media-body
                   p
                     span.badge.badge-info.mr-2='Ep.'+episode.no
                     =episode.title

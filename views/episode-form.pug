@@ -32,7 +32,7 @@ block content
       ul.js-preview.list-unstyled
       input(type='hidden' value=contents class='js-contents')
       hr
-      button(class='btn btn-primary js-post mr-2' type='button') Post
+      button(class='btn btn-primary js-post mr-2' type='button')=episode._id ? 'Save' : 'Post'
       a(href='/series/' + series.slug class='btn') Cancel
     if episode._id
       hr

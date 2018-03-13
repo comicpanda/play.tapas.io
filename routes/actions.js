@@ -107,8 +107,44 @@ router.delete('/edit/series/:slug', async (req, res, next) => {
     return res.redirect(`/series/${series.slug}`);
   }
 
-  //TODO Delete logic
-  res.redirect(`/series/${series.slug}`);
+  const episodes = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').find({series_id: `${series._id}`}).toArray((err, episodes) => {
+      if (err) {
+        return resject(err);
+      }
+      resolve(episodes);
+    });
+  }).catch(err => { next(err) });
+
+  const deletedFiles = episodes.map(episode => episode.contents)
+    .reduce((a, value) => a.concat(value), [])
+    .map(content => ({ filename: content.replace(S3_URL, '')}));
+
+  if (deletedFiles.length > 0) {
+    await DB.asyncQ((db, resolve, reject) => {
+      db.collection('deleted_files').insertMany(deletedFiles, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      })
+    });
+  }
+
+  await DB.asyncQ((db, resolve, reject) => {
+    db.collection('episode').deleteMany({series_id: `${series._id}`}, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    })
+  });
+
+  DB.q(next, db => {
+    db.collection('series').deleteOne({ _id: series._id }, (err, result) => {
+      res.redirect('/');
+    });
+  });
 });
 
 // --------- Episode

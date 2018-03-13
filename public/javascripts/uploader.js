@@ -54,12 +54,12 @@ class Uploader {
       type        : 'POST',
       url         : R_URL,
       data        : formData,
-      complete    : xhr => { this.$file.val(''); },
-      success     : res => { this.drawPreview(res) },
-      error       : xhr => {
+      complete    : xhr => { 
+        this.$file.val(''); 
         this.progressToggleModal(false);
-        alert((xhr.responseJSON || {}).message || xhr.statusText);
       },
+      success     : res => { this.drawPreview(res); },
+      error       : xhr => { alert((xhr.responseJSON || {}).message || xhr.statusText); },
       processData : false,
       contentType : false,
       dataType    : 'json',
@@ -72,11 +72,7 @@ class Uploader {
         if (xhr) {
           xhr.upload.addEventListener('progress', evt => {
             if (evt.lengthComputable) {
-              const progress = evt.loaded / evt.total;
-              this.progressBar.animate(progress, progress < 1 ? () => {} : () => {
-                this.progressToggleModal(false);
-              });
-            }
+              this.progressBar.animate(evt.loaded / evt.total);
           }, false);
           return xhr;
         }

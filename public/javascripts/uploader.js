@@ -73,6 +73,7 @@ class Uploader {
           xhr.upload.addEventListener('progress', evt => {
             if (evt.lengthComputable) {
               this.progressBar.animate(evt.loaded / evt.total);
+            }
           }, false);
           return xhr;
         }

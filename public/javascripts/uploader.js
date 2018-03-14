@@ -54,8 +54,8 @@ class Uploader {
       type        : 'POST',
       url         : R_URL,
       data        : formData,
-      complete    : xhr => { 
-        this.$file.val(''); 
+      complete    : xhr => {
+        this.$file.val('');
         this.progressToggleModal(false);
       },
       success     : res => { this.drawPreview(res); },
@@ -107,6 +107,11 @@ class Uploader {
   initToolbar() {
     const $toolbar = $('.js-toolbar');
     $toolbar.find('.js-delete-file').on('click', this.deleteFiles);
+    $toolbar.find('.js-delete-file-all').on('click', () => {
+      if (window.confirm('Do you want to delete them?')) {
+        this.$preview.empty();
+      }
+    });
     return $toolbar;
   }
 
@@ -122,8 +127,12 @@ class Uploader {
     });
 
     $('.js-post').on('click', e => {
+      const form = $('.js-upload-form');
+      if (form.data('submitted') || $('#title').val().length === 0 || $('#no').val().length === 0) {
+        return;
+      }
       if (this.$preview.find('li').length > 0) {
-        $('.js-upload-form').submit();
+        form.data('submitted', true).submit();
       } else {
         alert('Please add file(s).');
       }

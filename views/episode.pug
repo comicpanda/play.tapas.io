@@ -2,7 +2,7 @@ extends layout
 
 block content
   .container
-    a(href='/series/' + series.slug) 👈👈 Go to series
+    a(href='/series/' + series.slug) 👈 Go to series
     .episode
       span.badge.badge-info='Ep.'+episode.no
       h1=episode.title
@@ -17,16 +17,16 @@ block content
     p
       if (episodeNavMap.hasPrev)
         a(href='/series/' + series.slug + '/episodes/' + episodeNavMap.prevNo).
-          👈👈 <span class='badge badge-info'>Ep.#{episodeNavMap.prevNo}</span> Prev episode
+          👈 <span class='badge badge-info'>Ep.#{episodeNavMap.prevNo}</span> Prev episode
       if (episodeNavMap.hasPrev && episodeNavMap.hasNext)
-        span.mr-3.ml-3 |
+        span.mr-2.ml-2 |
       if (episodeNavMap.hasNext)
         a(href='/series/' + series.slug + '/episodes/' + episodeNavMap.nextNo).
-          <span class='badge badge-info'>Ep.#{episodeNavMap.nextNo}</span> Next episode 👉👉
+          <span class='badge badge-info'>Ep.#{episodeNavMap.nextNo}</span> Next episode 👉
     p
-      a(href='/series/' + series.slug) 👈👈 Go to series
+      a(href='/series/' + series.slug) 👈 Go to series
       span.mr-3.ml-3 |
-      a(href='#') 👆👆 Go to top
+      a(href='#') 👆 Go to top
     hr.mb-5
     #disqus_thread
     script(type="text/javascript").

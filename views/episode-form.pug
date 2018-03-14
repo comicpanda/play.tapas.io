@@ -27,8 +27,9 @@ block content
       input(type='hidden' name='series_id' value=series._id)
       input(type='hidden' name='series_slug' value=series.slug)
       input(type='hidden' name='_id' value=episode._id)
-      .js-toolbar.d-none
-        a(href='#' class='js-delete-file') Delete
+      .js-toolbar.d-none.mb-3
+        a(href='#' class='js-delete-file mr-2') Delete selcted file(s)
+        a(href='#' class='js-delete-file-all') Delete all
       ul.js-preview.list-unstyled
       input(type='hidden' value=contents class='js-contents')
       hr

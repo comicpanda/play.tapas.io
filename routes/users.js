@@ -20,7 +20,7 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
-  const user = { email: req.body.email, admin: req.body.admin };
+  const user = { email: req.body.email.trim(), admin: req.body.admin };
   DB.q(next, db => {
     db.collection('users').insertOne(user, (err, result) => {
       if (err) {

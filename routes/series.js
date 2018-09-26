@@ -41,7 +41,7 @@ router.post('/:slug/password/episodes/:no', (req, res, next) => {
   const slug = req.params.slug;
   DB.q(next, db => {
     db.collection('series').findOne({slug}, (err, series) => {
-      if (err || !serie) {
+      if (err || !series) {
         return next(err);
       }
       if (series.password !== req.body.password) {

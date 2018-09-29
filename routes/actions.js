@@ -17,7 +17,7 @@ router.post('/new/series', (req, res, next) => {
   const title = req.body.title;
   const author = req.body.author;
   const password = req.body.password;
-  const emails = req.body.emails;
+  const emails = (req.body.emails || '').trim();
   const series = { title, author, password, uid, emails };
   if (!title.trim() || !author.trim()) {
     return res.render('series-form', { mode: 'err', series });
@@ -63,7 +63,7 @@ router.post('/edit/series/:slug', async (req, res, next) => {
   const title = req.body.title;
   const author = req.body.author;
   const password = req.body.password;
-  const emails = req.body.emails;
+  const emails = (req.body.emails || '').trim();
   const series = { title, author, password, emails };
 
   if (!title.trim() || !author.trim()) {

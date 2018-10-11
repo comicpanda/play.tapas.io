@@ -4,7 +4,10 @@ const DB = require('../db');
 const ObjectId = DB.ObjectId;
 
 const session = {};
-const editable = (series, req) => series.uid === req.uid || (series.emails || '').split(',').indexOf(req.email) > -1;
+const editable = (series, req) =>
+  series.uid === req.uid ||
+  (series.emails || '').split(',').includes(req.email) ||
+  req.email === 'isyoon@tapasmedia.co';
 
 router.get('/:slug', (req, res, next) => {
   const slug = req.params.slug;
@@ -18,7 +21,13 @@ router.get('/:slug', (req, res, next) => {
         if (err) {
           return next(err);
         }
-        res.render('series', { episodes, series, editable: editable(series, req) });
+
+        res.render('series', {
+          episodes,
+          series,
+          editable: editable(series, req),
+          subscribed: (series.subscribers || '').split(',').includes(req.email)
+        });
       });
     });
   });

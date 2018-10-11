@@ -3,6 +3,11 @@ extends layout
 block content
   .container.js-container
     .episodes
+      form(method='post' class='js-delete-form' action='/a/sub/series/' + series.slug)
+        input(type='hidden' name='_id' value=series._id)
+        if subscribed
+          input(type='hidden' name='_method' value='DELETE')
+        button(class='btn btn-primary btn-sm float-right' type='submit')=subscribed ? 'Unsubscribe' : 'Subscribe'
       h1=series.title
       if editable
         p

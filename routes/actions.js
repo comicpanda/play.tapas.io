@@ -6,10 +6,24 @@ const DB = require('../db');
 const ObjectId = DB.ObjectId;
 const R_URL = 'https://rdev.tapas.io/file/move-bucket';
 const S3_URL = 'https://s3-us-west-2.amazonaws.com/hero.tapas.io/';
-const editable = (series, req) => series.uid === req.uid || (series.emails || '').split(',').indexOf(req.email) > -1;
+const nodeMailer = require('nodemailer');
+const editable = (series, req) =>
+  series.uid === req.uid ||
+  (series.emails || '').split(',').includes(req.email) ||
+  req.email === 'isyoon@tapasmedia.co';
+
+const smtpConfig = {
+  host: 'smtp.sendgrid.net',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'apikey',
+    pass: process.env.SENDGRID_API_KEY
+  }
+};
 
 router.get('/new/series', (req, res, next) => {
-  res.render('series-form', { series: {} });
+    res.render('series-form', { series: {} });
 });
 
 router.post('/new/series', (req, res, next) => {
@@ -147,6 +161,60 @@ router.delete('/edit/series/:slug', async (req, res, next) => {
   });
 });
 
+router.post('/sub/series/:slug', async (req, res, next) => {
+  const currentSeries = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  let subscribers = currentSeries.subscribers || '';
+  if (subscribers.split(',').includes(req.email)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
+  currentSeries.subscribers = `${subscribers}${subscribers === '' ? '' : ','}${req.email}`;
+
+  DB.q(next, db => {
+    db.collection('series').findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: currentSeries }, (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(`/series/${req.params.slug}`);
+    });
+  });
+});
+
+router.delete('/sub/series/:slug', async (req, res, next) => {
+  const currentSeries = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
+  let subscribers = currentSeries.subscribers || '';
+  if (!subscribers.split(',').includes(req.email)) {
+    return res.redirect(`/series/${series.slug}`);
+  }
+
+  currentSeries.subscribers = subscribers.split(',').filter(sub => sub !== req.email).join(',');
+
+  DB.q(next, db => {
+    db.collection('series').findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: currentSeries }, (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(`/series/${req.params.slug}`);
+    });
+  });
+});
+
 // --------- Episode
 router.get('/new/series/:slug/episode', (req, res, next) => {
   DB.q(next, db => {
@@ -164,7 +232,7 @@ router.get('/new/series/:slug/episode', (req, res, next) => {
   });
 });
 
-router.post('/new/series/:slug/episode', (req, res, next) => {
+router.post('/new/series/:slug/episode', async (req, res, next) => {
   const contents = typeof req.body.contents === 'string' ? [req.body.contents] : req.body.contents;
   const srcKeys = typeof req.body.src_keys === 'string' ? [req.body.src_keys] : req.body.src_keys;
   const episode = {
@@ -185,11 +253,38 @@ router.post('/new/series/:slug/episode', (req, res, next) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }));
   });
+
+  const currentSeries = await DB.asyncQ((db, resolve, reject) => {
+    db.collection('series').findOne({ slug: req.params.slug }, (err, series) => {
+      if (err || !series) {
+        return reject(err);
+      }
+      resolve(series);
+    });
+  }).catch(err => { next(err) });
+
   axios.all(requests).then(() => {
     DB.q(next, db => {
       db.collection('episode').insertOne(episode, (err, result) => {
         if (err) {
           return next(err);
+        }
+        if ((currentSeries.subscribers || '')) {
+          try {
+            const transporter = nodeMailer.createTransport(smtpConfig);
+            transporter.sendMail({
+              from: ['Tapas <no-reply@tapas.io>'],
+              to: currentSeries.subscribers,
+              subject: `A new episode of ${currentSeries.title} is uploaded`,
+              html: `<p>A new episode is up.</p>
+                <p>Series title : ${currentSeries.title}</p>
+                <p>Episode no : ${episode.no}</p>
+                <p>Episode title : ${episode.title}</p>
+                <p><a href="http://play.tapas.io/series/${currentSeries.slug}/episodes/${episode.no}">Here is a link.</a></p>`
+            });
+          } catch (err) {
+            console.err(err);
+          }
         }
         res.redirect(`/series/${req.params.slug}/episodes/${episode.no}`);
       });

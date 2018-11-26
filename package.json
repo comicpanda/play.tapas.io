@@ -20,5 +20,9 @@
     "nodemailer": "^4.6.8",
     "pug": "2.0.0-beta11",
     "serve-favicon": "~2.4.5"
+  },
+  "engines": {
+    "node": "8.9.x",
+    "npm": "5.6.x"
   }
 }

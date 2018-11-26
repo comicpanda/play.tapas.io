@@ -245,7 +245,7 @@ router.post('/new/series/:slug/episode', async (req, res, next) => {
   let requests = [];
   contents.forEach((content, idx) => {
     requests.push(axios.post(R_URL, querystring.stringify({
-      src_bucket: 'r.tapas.io',
+      src_bucket: 'rdev.tapas.io',
       desc_bucket: 'hero.tapas.io',
       src_key: srcKeys[idx],
       desc_key: content
@@ -378,7 +378,7 @@ router.post('/edit/series/:slug/episodes/:episodeId', async (req, res, next) => 
   contents.forEach((content, idx) => {
     if (!content.startsWith('https')) {
       requests.push(axios.post(R_URL, querystring.stringify({
-        src_bucket: 'r.tapas.io',
+        src_bucket: 'rdev.tapas.io',
         desc_bucket: 'hero.tapas.io',
         src_key: srcKeys[idx],
         desc_key: content

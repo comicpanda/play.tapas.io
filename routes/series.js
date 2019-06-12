@@ -7,7 +7,7 @@ const session = {};
 const editable = (series, req) =>
   series.uid === req.uid ||
   (series.emails || '').split(',').includes(req.email) ||
-  req.email === 'isyoon@tapasmedia.co';
+  ['isyoon@tapasmedia.co', 'brooke@tapasmedia.co', 'gabrielleluu@tapasmedia.co'].includes(req.email);
 
 router.get('/:slug', (req, res, next) => {
   const slug = req.params.slug;

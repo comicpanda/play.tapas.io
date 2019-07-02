@@ -10,7 +10,7 @@ const nodeMailer = require('nodemailer');
 const editable = (series, req) =>
   series.uid === req.uid ||
   (series.emails || '').split(',').includes(req.email) ||
-  req.email === 'isyoon@tapasmedia.co';
+  req.email.split('@')[1] === 'tapasmedia.co';
 
 const smtpConfig = {
   host: 'smtp.sendgrid.net',
